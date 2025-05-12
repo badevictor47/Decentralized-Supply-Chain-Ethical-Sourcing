@@ -1,30 +1,70 @@
+;; standards-compliance.clar
+;; Records ethical requirements for suppliers
 
-;; title: standards-compliance
-;; version:
-;; summary:
-;; description:
+(define-data-var last-standard-id uint u0)
 
-;; traits
-;;
+(define-map standards
+  { standard-id: uint }
+  {
+    name: (string-ascii 100),
+    description: (string-ascii 255),
+    created-at: uint,
+    created-by: principal
+  }
+)
 
-;; token definitions
-;;
+(define-map supplier-compliance
+  { supplier-id: uint, standard-id: uint }
+  {
+    compliant: bool,
+    compliance-date: uint,
+    verifier: principal,
+    evidence-hash: (buff 32)
+  }
+)
 
-;; constants
-;;
+(define-public (create-standard (name (string-ascii 100)) (description (string-ascii 255)))
+  (let
+    (
+      (new-id (+ (var-get last-standard-id) u1))
+    )
+    (var-set last-standard-id new-id)
+    (map-set standards
+      { standard-id: new-id }
+      {
+        name: name,
+        description: description,
+        created-at: block-height,
+        created-by: tx-sender
+      }
+    )
+    (ok new-id)
+  )
+)
 
-;; data vars
-;;
+(define-public (set-compliance (supplier-id uint) (standard-id uint) (compliant bool) (evidence-hash (buff 32)))
+  (begin
+    (map-set supplier-compliance
+      { supplier-id: supplier-id, standard-id: standard-id }
+      {
+        compliant: compliant,
+        compliance-date: block-height,
+        verifier: tx-sender,
+        evidence-hash: evidence-hash
+      }
+    )
+    (ok true)
+  )
+)
 
-;; data maps
-;;
+(define-read-only (get-standard (standard-id uint))
+  (map-get? standards { standard-id: standard-id })
+)
 
-;; public functions
-;;
+(define-read-only (get-compliance (supplier-id uint) (standard-id uint))
+  (map-get? supplier-compliance { supplier-id: supplier-id, standard-id: standard-id })
+)
 
-;; read only functions
-;;
-
-;; private functions
-;;
-
+(define-read-only (is-compliant (supplier-id uint) (standard-id uint))
+  (default-to false (get compliant (map-get? supplier-compliance { supplier-id: supplier-id, standard-id: standard-id })))
+)
