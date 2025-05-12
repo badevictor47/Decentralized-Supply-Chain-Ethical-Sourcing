@@ -5,3 +5,5 @@ L
 contracts/certification.clar,2/8/28224e37ba53d70868e7d7020ff8ca71138d80b2
 S
 #contracts/standards-compliance.clar,5/0/501a9b03bb376c4c33060e4e6008976e5aa64330
+T
+$contracts/supplier-verification.clar,1/e/1eeafa16bd5f2c0aa8a2cf22d6d886e3463492c6
